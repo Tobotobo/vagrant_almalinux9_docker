@@ -10,6 +10,7 @@
 * 環境
 * 操作
 * 動作確認
+* RemoteSSH で接続
 * トラブルシューティング
 
 ## 前提
@@ -105,8 +106,34 @@ docker run --rm -p 8080:80 nginx
 http://192.168.33.10:8080/
 ![](doc/image/2024-04-07-03-57-51.png)
 
+## RemoteSSH で接続
+1. VSCode に [Remote - SSH](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-ssh)  をインストール  
+  ※ [Remote Development](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.vscode-remote-extensionpack) に含まれているので、こちらでも可
+2. `%USERPROFILE%\.ssh\config` に接続先として以下を追加  
+    ※XXXXX はユーザー名
+    ```
+    Host 192.168.33.10
+      HostName 192.168.33.10
+      User vagrant
+      IdentityFile C:/Users/XXXXX/.ssh/id_ed25519
+    ```
+3. 接続  
+    ![](doc/image/2024-04-07-10-12-50.png)
+
 ## トラブルシューティング
 
-```
-ssh-keygen -R 192.168.33.10
-```
+* RemoteSSH で接続できない。  
+  また、ssh コマンドで接続すると WARNING: REMOTE HOST IDENTIFICATION HAS CHANGED! と表示される。  
+  ※ssh コマンド `ssh vagrant@192.168.33.10` ※PW: vagrant  
+
+  (原因)  
+  ssh はセキュリティのため、接続した接続先と接続先情報(フィンガープリント)を保存している。  
+  接続先は同じなのに接続先情報が異なる場合、なりすましなどの可能性があるので上記の警告が表示され接続できないようになっている。  
+  同じ IP で別の VM を作ると、当たり前だが接続先情報が異なるので、これに引っかかる。
+
+  (対応)  
+  保存されている接続先情報を削除する。  
+  ※前述のとおりセキュリティの機能なので、本来は安易に削除せず警告の原因を確認する必要があることに留意すること
+  ```
+  ssh-keygen -R 192.168.33.10
+  ```
